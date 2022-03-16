@@ -2,11 +2,17 @@ import argparse
 import os
 import random
 import xml.etree.ElementTree as ET
+from nltk import stem
+import nltk
+nltk.download('stopwords')
+import string
 from pathlib import Path
 
 def transform_name(product_name):
-    # IMPLEMENT
-    return product_name
+    lowerCase = product_name.lower()
+    punctuationRemoved = lowerCase.translate(str.maketrans(string.punctuation, ' '*len(string.punctuation))) 
+    stemmer = stem.SnowballStemmer("english")
+    return stemmer.stem(punctuationRemoved)
 
 # Directory for product data
 directory = r'/workspace/search_with_machine_learning_course/data/pruned_products/'
@@ -35,6 +41,12 @@ if args.input:
 min_products = args.min_products
 sample_rate = args.sample_rate
 
+def extract_category(element):
+    if (element.find('categoryPath') is not None and len(element.find('categoryPath')) > 0):
+        return element.find('categoryPath')[min(2, len(element.find('categoryPath'))) - 1][0].text
+    return None
+
+categoryProductMap = {}
 print("Writing results to %s" % output_file)
 with open(output_file, 'w') as output:
     for filename in os.listdir(directory):
@@ -48,11 +60,18 @@ with open(output_file, 'w') as output:
                     continue
                 # Check to make sure category name is valid
                 if (child.find('name') is not None and child.find('name').text is not None and
-                    child.find('categoryPath') is not None and len(child.find('categoryPath')) > 0 and
-                    child.find('categoryPath')[len(child.find('categoryPath')) - 1][0].text is not None):
+                    extract_category(child) is not None):
                       # Choose last element in categoryPath as the leaf categoryId
-                      cat = child.find('categoryPath')[len(child.find('categoryPath')) - 1][0].text
+                      cat = extract_category(child)
                       # Replace newline chars with spaces so fastText doesn't complain
                       name = child.find('name').text.replace('\n', ' ')
-                      output.write("__label__%s %s\n" % (cat, transform_name(name)))
+                      categoryList = categoryProductMap.get(cat, [])
+                      categoryList.append(name)
+                      categoryProductMap[cat] = categoryList
+                    #   output.write("__label__%s %s\n" % (cat, transform_name(name)))
+    for category in categoryProductMap:
+        if (len(categoryProductMap[category]) > min_products):
+            for name in categoryProductMap[category]:
+                output.write("__label__%s %s\n" % (category, transform_name(name)))
+    
 
