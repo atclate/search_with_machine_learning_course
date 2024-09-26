@@ -5,12 +5,99 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Python: 1 - Add LTR store",
+            "type": "python",
+            "request": "launch",
+            "program": "week2/utilities/build_ltr.py",
+            "env": {},
+            "args": [
+                "--create_ltr_store"
+            ]
+        },
+        {
+            "name": "Python: 2 - Upload Feature Set",
+            "type": "python",
+            "request": "launch",
+            "program": "week2/utilities/build_ltr.py",
+            "env": {},
+            "args": [
+                "-f",
+                "week2/conf/ltr_featureset.json",
+                "--upload_featureset"
+            ]
+        },
+        {
+            "name": "Python: 3 - Split Data Set",
+            "type": "python",
+            "request": "launch",
+            "program": "week2/utilities/build_ltr.py",
+            "env": {},
+            "args": [
+                "--output_dir",
+                "/workspace/ltr_output",
+                "--split_input",
+                "/workspace/datasets/train.csv",
+                "--split_train_rows",
+                "1000000",
+                "--split_test_rows",
+                "1000000"
+            ]
+        },
+        {
+            "name": "Python: 4A - Generate Impression File",
+            "type": "python",
+            "request": "launch",
+            "program": "week2/utilities/build_ltr.py",
+            "env": {},
+            "args": [
+                "--generate_impressions",
+                "--output_dir",
+                "/workspace/ltr_output",
+                "--train_file",
+                "/workspace/ltr_output/train.csv",
+                "--synthesize"
+            ]
+        },
+        {
+            "name": "Python: 4B - Generate Impression File",
+            "type": "python",
+            "request": "launch",
+            "program": "week2/utilities/build_ltr.py",
+            "env": {},
+            "args": [
+                "--ltr_terms_field",
+                "sku",
+                "--output_dir",
+                "/workspace/ltr_output",
+                "--create_xgb_training",
+                "-f",
+                "week2/conf/ltr_featureset.json",
+                "--click_model",
+                "heuristic"
+            ]
+        },
+        {
+            "name": "Python: 5 - XGB training",
+            "type": "python",
+            "request": "launch",
+            "program": "week2/utilities/build_ltr.py",
+            "env": {},
+            "args": [
+                "--output_dir",
+                "/workspace/ltr_output",
+                "-x",
+                "/workspace/ltr_output/training.xgb",
+                "--xgb_conf",
+                "week2/conf/xgb-conf.json"
+            ]
+        },
+        {
             "name": "Python: Flask",
             "type": "python",
             "request": "launch",
             "module": "flask",
             "env": {
-                "FLASK_APP": "week1",
+                "FLASK_APP": "week2",
                 "FLASK_ENV": "development"
             },
             "args": [
